@@ -1,0 +1,185 @@
+unit formDados;
+
+interface
+
+uses
+  SysUtils, Classes, DB, ADODB;
+
+type
+  TdtmDados = class(TDataModule)
+    dbConnection: TADOConnection;
+    qryCaixa: TADOQuery;
+    dsCaixa: TDataSource;
+    qryAluno: TADOQuery;
+    dsAluno: TDataSource;
+    qryItemCaixa: TADOQuery;
+    dsItemCaixa: TDataSource;
+    qryCaixaCodCaixa: TAutoIncField;
+    qryCaixaTotal: TBCDField;
+    qryAlunoCodAluno: TAutoIncField;
+    qryAlunoNome: TWideStringField;
+    qryAlunoNascimento: TDateTimeField;
+    qryAlunoPratica: TIntegerField;
+    qryItemCaixaCodCaixa: TIntegerField;
+    qryItemCaixaCodAluno: TIntegerField;
+    qryItemCaixaSubTotal: TBCDField;
+    qryCaixaMes: TIntegerField;
+    qryCaixaAno: TIntegerField;
+    Temp: TADOQuery;
+    qryItemCaixaAluno: TStringField;
+    qryItemCaixaCodItemCaixa: TAutoIncField;
+    qryAtivos: TADOQuery;
+    dsAtivos: TDataSource;
+    qryAtivosCodAluno: TAutoIncField;
+    qryAtivosNome: TWideStringField;
+    qryAtivosNascimento: TDateTimeField;
+    qryAtivosPratica: TIntegerField;
+    qryAtivosEntrada: TDateTimeField;
+    qryAtivosEmail: TWideStringField;
+    qryAtivosTelefone: TWideStringField;
+    qryAtivosCelular: TWideStringField;
+    qryAtivosEndereco: TWideStringField;
+    qryAtivosStatus: TWideStringField;
+    qryAtivosRG: TWideStringField;
+    qryAtivosVencimento: TIntegerField;
+    qryAtivosHorario: TDateTimeField;
+    qryAtivosPlano: TWideStringField;
+    qryAtivosGraduacao: TWideStringField;
+    qryAtivosBairro: TWideStringField;
+    qryAtivosCidade: TWideStringField;
+    qryAtivosUF: TWideStringField;
+    qryAtivosCEP: TWideStringField;
+    qryAtivosPai: TWideStringField;
+    qryAtivosMae: TWideStringField;
+    qryAtivosProfissao: TWideStringField;
+    qryAtivosGrSangue: TWideStringField;
+    qryAtivosConvenio: TBooleanField;
+    qryAtivosConvenioNome: TWideStringField;
+    qryAtivosHospital: TWideStringField;
+    qryAtivosContatoEmergencia: TWideStringField;
+    qryAtivosTelefoneEmergencia1: TWideStringField;
+    qryAtivosTelefoneEmergencia2: TWideStringField;
+    qryAtivosObservacao: TMemoField;
+    qryAtivosDesconto: TSmallintField;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure qryItemCaixaAfterInsert(DataSet: TDataSet);
+    procedure qryCaixaAfterInsert(DataSet: TDataSet);
+    procedure qryCaixaAfterPost(DataSet: TDataSet);
+    procedure dsCaixaDataChange(Sender: TObject; Field: TField);
+    procedure qryItemCaixaAfterPost(DataSet: TDataSet);
+    procedure dsAtivosDataChange(Sender: TObject; Field: TField);
+    procedure qryItemCaixaAfterCancel(DataSet: TDataSet);
+    procedure qryItemCaixaAfterEdit(DataSet: TDataSet);
+    procedure qryItemCaixaAfterDelete(DataSet: TDataSet);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dtmDados: TdtmDados;
+
+implementation
+
+uses formPrincipal;
+
+{$R *.dfm}
+
+procedure TdtmDados.DataModuleCreate(Sender: TObject);
+begin
+ qrycaixa.Open;
+ qryaluno.Open;
+ qryativos.Open;
+ qryitemcaixa.Open;
+end;
+
+procedure TdtmDados.qryItemCaixaAfterInsert(DataSet: TDataSet);
+begin
+ qryItemCaixaSubTotal.AsFloat     := 5;
+ qryItemCaixaCodCaixa.AsInteger   := qryCaixaCodCaixa.AsInteger;
+ {***}
+ frmPrincipal.dbcAluno.ListSource := dtmDados.dsAtivos;
+ frmPrincipal.btnAluno.Enabled    := false;
+ frmPrincipal.btnOk.Enabled       := false;
+ frmPrincipal.btnCancelar.Enabled := false;
+end;
+
+procedure TdtmDados.qryCaixaAfterInsert(DataSet: TDataSet);
+begin
+ qryCaixaMes.AsInteger := strtoint(formatdatetime('mm', now));
+ qryCaixaAno.AsInteger := strtoint(formatdatetime('yyyy', now));
+ frmprincipal.dbemes.SetFocus;
+end;
+
+procedure TdtmDados.qryCaixaAfterPost(DataSet: TDataSet);
+begin
+ qrycaixa.updatebatch;
+
+ qryitemcaixa.Filtered := false;
+ qryitemcaixa.Filter   := 'codcaixa = ' + qryCaixaCodCaixa.AsString;
+ qryitemcaixa.Filtered := true;
+end;
+
+procedure TdtmDados.dsCaixaDataChange(Sender: TObject; Field: TField);
+begin
+ if frmprincipal <> nil then
+ begin
+   temp.Close;
+   temp.SQL.Text := 'select sum(total) as TotalGeral from caixa';
+   temp.Open;
+   {***}
+   frmprincipal.lblTotalGeral.Caption := formatfloat('R$ #,##0.00', temp.fieldbyname('totalgeral').AsFloat);
+
+   if qryCaixaCodCaixa.AsString <> '' then
+   begin
+     qryitemcaixa.Filtered := false;
+     qryitemcaixa.Filter   := 'codcaixa = ' + qryCaixaCodCaixa.AsString;
+     qryitemcaixa.Filtered := true;
+
+     temp.Close;
+     temp.SQL.Text := 'select count(*) as Alunos from itemcaixa where codcaixa = ' + qryCaixaCodCaixa.AsString;
+     temp.Open;
+     {***}
+     frmprincipal.lblContAluno.Caption := formatfloat('00', temp.fieldbyname('alunos').Asinteger) + ' Alunos cadastrados em ' + FormatDateTime('mmmm', strtodate('01/' + qryCaixaMes.AsString + '/' + qryCaixaAno.AsString)) + ' de ' + qryCaixaAno.AsString;
+   end;
+ end;
+end;
+
+procedure TdtmDados.qryItemCaixaAfterPost(DataSet: TDataSet);
+begin
+ frmPrincipal.dbcAluno.ListSource := dtmDados.dsAluno;
+ frmPrincipal.btnAluno.Enabled    := true;
+ frmPrincipal.btnOk.Enabled       := true;
+ frmPrincipal.btnCancelar.Enabled := true;
+ {***}
+ frmPrincipal.btnOk.Click;
+end;
+
+procedure TdtmDados.dsAtivosDataChange(Sender: TObject; Field: TField);
+begin
+ if frmprincipal <> nil then
+   qryAluno.Locate('codaluno', qryAtivosCodAluno.AsInteger, []);
+end;
+
+procedure TdtmDados.qryItemCaixaAfterCancel(DataSet: TDataSet);
+begin
+ frmPrincipal.dbcAluno.ListSource := dtmDados.dsAluno;
+ frmPrincipal.btnAluno.Enabled    := true;
+ frmPrincipal.btnOk.Enabled       := true;
+ frmPrincipal.btnCancelar.Enabled := true;
+end;
+
+procedure TdtmDados.qryItemCaixaAfterEdit(DataSet: TDataSet);
+begin
+ frmPrincipal.btnAluno.Enabled    := false;
+ frmPrincipal.btnOk.Enabled       := false;
+ frmPrincipal.btnCancelar.Enabled := false;
+end;
+
+procedure TdtmDados.qryItemCaixaAfterDelete(DataSet: TDataSet);
+begin
+ frmPrincipal.btnOk.Click;
+end;
+
+end.

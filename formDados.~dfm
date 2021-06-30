@@ -1,0 +1,272 @@
+object dtmDados: TdtmDados
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Left = 261
+  Top = 117
+  Height = 284
+  Width = 360
+  object dbConnection: TADOConnection
+    ConnectionString = 
+      'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=R:\Arquivos\Delphi\' +
+      'Shao Lin\Caixa\Caixa.mdb;Persist Security Info=False;'
+    KeepConnection = False
+    LoginPrompt = False
+    Mode = cmShareDenyNone
+    Provider = 'Microsoft.Jet.OLEDB.4.0'
+    Left = 32
+    Top = 24
+  end
+  object qryCaixa: TADOQuery
+    Connection = dbConnection
+    LockType = ltBatchOptimistic
+    AfterInsert = qryCaixaAfterInsert
+    AfterPost = qryCaixaAfterPost
+    Parameters = <>
+    SQL.Strings = (
+      'select * from caixa')
+    Left = 32
+    Top = 96
+    object qryCaixaCodCaixa: TAutoIncField
+      FieldName = 'CodCaixa'
+      ReadOnly = True
+    end
+    object qryCaixaTotal: TBCDField
+      Alignment = taLeftJustify
+      FieldName = 'Total'
+      DisplayFormat = 'Total: R$ #,##0.00'
+      Precision = 19
+    end
+    object qryCaixaMes: TIntegerField
+      Alignment = taCenter
+      FieldName = 'Mes'
+      DisplayFormat = '00'
+    end
+    object qryCaixaAno: TIntegerField
+      Alignment = taCenter
+      FieldName = 'Ano'
+      DisplayFormat = '0000'
+    end
+  end
+  object dsCaixa: TDataSource
+    DataSet = qryCaixa
+    OnDataChange = dsCaixaDataChange
+    Left = 104
+    Top = 96
+  end
+  object qryAluno: TADOQuery
+    Connection = dbConnection
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'select * from aluno')
+    Left = 200
+    Top = 96
+    object qryAlunoCodAluno: TAutoIncField
+      FieldName = 'CodAluno'
+      ReadOnly = True
+      DisplayFormat = '00000'
+    end
+    object qryAlunoNome: TWideStringField
+      FieldName = 'Nome'
+      Size = 100
+    end
+    object qryAlunoNascimento: TDateTimeField
+      FieldName = 'Nascimento'
+      EditMask = '99/99/9999'
+    end
+    object qryAlunoPratica: TIntegerField
+      Alignment = taLeftJustify
+      FieldName = 'Pratica'
+      DisplayFormat = '000 meses'
+    end
+  end
+  object dsAluno: TDataSource
+    DataSet = qryAluno
+    Left = 272
+    Top = 96
+  end
+  object qryItemCaixa: TADOQuery
+    Connection = dbConnection
+    LockType = ltBatchOptimistic
+    AfterInsert = qryItemCaixaAfterInsert
+    AfterEdit = qryItemCaixaAfterEdit
+    AfterPost = qryItemCaixaAfterPost
+    AfterCancel = qryItemCaixaAfterCancel
+    AfterDelete = qryItemCaixaAfterDelete
+    Parameters = <>
+    SQL.Strings = (
+      'select * from itemcaixa')
+    Left = 32
+    Top = 152
+    object qryItemCaixaCodItemCaixa: TAutoIncField
+      FieldName = 'CodItemCaixa'
+      ReadOnly = True
+    end
+    object qryItemCaixaCodCaixa: TIntegerField
+      FieldName = 'CodCaixa'
+    end
+    object qryItemCaixaCodAluno: TIntegerField
+      FieldName = 'CodAluno'
+    end
+    object qryItemCaixaSubTotal: TBCDField
+      Alignment = taCenter
+      FieldName = 'SubTotal'
+      currency = True
+      Precision = 19
+    end
+    object qryItemCaixaAluno: TStringField
+      DisplayWidth = 100
+      FieldKind = fkLookup
+      FieldName = 'Aluno'
+      LookupDataSet = qryAluno
+      LookupKeyFields = 'CodAluno'
+      LookupResultField = 'Nome'
+      KeyFields = 'CodAluno'
+      Size = 100
+      Lookup = True
+    end
+  end
+  object dsItemCaixa: TDataSource
+    DataSet = qryItemCaixa
+    Left = 104
+    Top = 152
+  end
+  object Temp: TADOQuery
+    Connection = dbConnection
+    Parameters = <>
+    Left = 200
+    Top = 24
+  end
+  object qryAtivos: TADOQuery
+    Connection = dbConnection
+    CursorType = ctStatic
+    Parameters = <>
+    SQL.Strings = (
+      'select * from aluno'
+      'where status = "Ativo"')
+    Left = 200
+    Top = 152
+    object qryAtivosCodAluno: TAutoIncField
+      FieldName = 'CodAluno'
+      ReadOnly = True
+    end
+    object qryAtivosNome: TWideStringField
+      FieldName = 'Nome'
+      Size = 100
+    end
+    object qryAtivosNascimento: TDateTimeField
+      FieldName = 'Nascimento'
+    end
+    object qryAtivosPratica: TIntegerField
+      FieldName = 'Pratica'
+    end
+    object qryAtivosEntrada: TDateTimeField
+      FieldName = 'Entrada'
+    end
+    object qryAtivosEmail: TWideStringField
+      FieldName = 'Email'
+      Size = 150
+    end
+    object qryAtivosTelefone: TWideStringField
+      FieldName = 'Telefone'
+      Size = 255
+    end
+    object qryAtivosCelular: TWideStringField
+      FieldName = 'Celular'
+      Size = 255
+    end
+    object qryAtivosEndereco: TWideStringField
+      FieldName = 'Endereco'
+      Size = 200
+    end
+    object qryAtivosStatus: TWideStringField
+      FieldName = 'Status'
+      Size = 7
+    end
+    object qryAtivosRG: TWideStringField
+      FieldName = 'RG'
+      Size = 60
+    end
+    object qryAtivosVencimento: TIntegerField
+      FieldName = 'Vencimento'
+    end
+    object qryAtivosHorario: TDateTimeField
+      FieldName = 'Horario'
+    end
+    object qryAtivosPlano: TWideStringField
+      FieldName = 'Plano'
+      Size = 2
+    end
+    object qryAtivosGraduacao: TWideStringField
+      FieldName = 'Graduacao'
+      Size = 60
+    end
+    object qryAtivosBairro: TWideStringField
+      FieldName = 'Bairro'
+      Size = 180
+    end
+    object qryAtivosCidade: TWideStringField
+      FieldName = 'Cidade'
+      Size = 150
+    end
+    object qryAtivosUF: TWideStringField
+      FieldName = 'UF'
+      Size = 2
+    end
+    object qryAtivosCEP: TWideStringField
+      FieldName = 'CEP'
+    end
+    object qryAtivosPai: TWideStringField
+      FieldName = 'Pai'
+      Size = 255
+    end
+    object qryAtivosMae: TWideStringField
+      FieldName = 'Mae'
+      Size = 255
+    end
+    object qryAtivosProfissao: TWideStringField
+      FieldName = 'Profissao'
+      Size = 255
+    end
+    object qryAtivosGrSangue: TWideStringField
+      FieldName = 'GrSangue'
+      Size = 4
+    end
+    object qryAtivosConvenio: TBooleanField
+      FieldName = 'Convenio'
+    end
+    object qryAtivosConvenioNome: TWideStringField
+      FieldName = 'ConvenioNome'
+      Size = 180
+    end
+    object qryAtivosHospital: TWideStringField
+      FieldName = 'Hospital'
+      Size = 180
+    end
+    object qryAtivosContatoEmergencia: TWideStringField
+      FieldName = 'ContatoEmergencia'
+      Size = 180
+    end
+    object qryAtivosTelefoneEmergencia1: TWideStringField
+      FieldName = 'TelefoneEmergencia1'
+      Size = 255
+    end
+    object qryAtivosTelefoneEmergencia2: TWideStringField
+      FieldName = 'TelefoneEmergencia2'
+      Size = 255
+    end
+    object qryAtivosObservacao: TMemoField
+      FieldName = 'Observacao'
+      BlobType = ftMemo
+    end
+    object qryAtivosDesconto: TSmallintField
+      FieldName = 'Desconto'
+    end
+  end
+  object dsAtivos: TDataSource
+    DataSet = qryAtivos
+    OnDataChange = dsAtivosDataChange
+    Left = 272
+    Top = 152
+  end
+end
